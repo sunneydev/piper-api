@@ -3,7 +3,7 @@ import http from "http";
 import Rooms from "./rooms";
 import express from "express";
 import { Server } from "socket.io";
-import { Action, User } from "./types";
+import { Action, Room, User } from "./types";
 
 const app = express();
 const rooms = new Rooms();
@@ -32,42 +32,48 @@ router.delete("/rooms/:roomId", (req, res) => {
 app.use("/admin", router);
 
 io.on("connection", (socket) => {
-  const dispatch = (action: Action) => {
-    room?.update(action);
-    socket.broadcast.to(roomId).emit("action", action);
+  const dispatch = (room: Room, action: Action) => {
+    room.update(action);
+    socket.broadcast.to(room.id).emit("action", action);
   };
 
-  const roomId = socket.handshake.query.roomId as string;
-  const room = rooms.getRoomById(roomId);
-  let _user: User;
+  let room: Room | undefined;
+  let user: User | undefined;
 
-  if (!room) {
-    socket.emit("error", { message: "Room not found" });
-    return socket.disconnect();
-  }
+  socket.on("join", (payload: { roomId: string; user: User }) => {
+    const _room = rooms.getRoomById(payload.roomId);
+    room = _room;
 
-  socket.on("join", ({ roomId, user }: { roomId: string; user: User }) => {
-    if (user) {
-      _user = user;
+    if (!room) {
+      socket.emit("error", { message: "Room not found" });
+      return socket.disconnect();
+    }
+
+    if (payload.user) {
+      user = payload.user;
     } else {
       socket.emit("error", { message: "No user provided" });
       return socket.disconnect();
     }
 
-    socket.join(roomId);
-    dispatch({ type: "ADD", property: "users", payload: user });
+    dispatch(room, { type: "ADD", property: "users", payload: user });
+    socket.emit("room", room);
+    socket.join(room.id);
   });
 
-  socket.on("action", (action: Action) => dispatch(action));
+  socket.on("action", dispatch);
 
-  socket.on("disconnect", () => {
-    if (_user)
-      dispatch({
+  socket.on(
+    "disconnect",
+    () =>
+      room &&
+      user &&
+      dispatch(room, {
         type: "REMOVE",
-        payload: _user,
+        payload: user,
         property: "users",
-      });
-  });
+      })
+  );
 });
 
 app.get("/room/:roomId", (req, res) => {
@@ -83,6 +89,4 @@ app.get("/room/:roomId", (req, res) => {
 
 app.post("/room", (req, res) => res.json(rooms.createRoom(req.body.ownerId)));
 
-server.listen(port, () => {
-  console.log("Server started");
-});
+server.listen(port, () => console.log(`Listening on port ${port} ✅`));

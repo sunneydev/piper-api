@@ -3,13 +3,16 @@ export type Room = {
   users: User[];
   messages: Message[];
   ownerId: string;
-  video: {
-    url: string;
-    time: number;
-    paused: boolean;
-  };
+  video: Video;
   update: (action: Action) => void;
 };
+
+export interface Video {
+  url: string;
+  time: number;
+  paused: boolean;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -18,12 +21,16 @@ export interface User {
 
 export interface Message {
   content: string;
-  authorId: string;
   author: User;
 }
 
-export interface Action {
+export type RoomStateProperties = keyof Pick<
+  Room,
+  "messages" | "users" | "video"
+>;
+
+export type Action = {
   type: "ADD" | "REMOVE" | "SET";
-  property: "messages" | "users" | "video";
+  property: RoomStateProperties;
   payload: any;
-}
+};

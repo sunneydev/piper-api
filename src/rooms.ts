@@ -45,6 +45,15 @@ class Rooms {
 
     switch (action.type) {
       case "ADD":
+        if (
+          action.property === "users" &&
+          this._rooms[roomId][action.property].find(
+            (item) => item.id === action.payload.id
+          )
+        ) {
+          return false;
+        }
+
         (this._rooms[roomId][action.property] as any[]).push(action.payload);
         break;
       case "REMOVE":
