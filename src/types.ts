@@ -1,11 +1,10 @@
-export type Room = {
+export interface IRoom {
   id: string;
   users: User[];
   messages: Message[];
   ownerId: string;
   video: Video;
-  update: (action: Action) => void;
-};
+}
 
 export interface Video {
   url: string;
@@ -24,13 +23,20 @@ export interface Message {
   author: User;
 }
 
-export type RoomStateProperties = keyof Pick<
-  Room,
-  "messages" | "users" | "video"
->;
-
-export type Action = {
-  type: "ADD" | "REMOVE" | "SET";
-  property: RoomStateProperties;
-  payload: any;
-};
+export type Action =
+  | {
+      type: "add-user" | "remove-user";
+      payload: User;
+    }
+  | {
+      type: "add-message";
+      payload: Message;
+    }
+  | {
+      type: "set-video";
+      payload: Video;
+    }
+  | {
+      type: "room";
+      payload: IRoom;
+    };

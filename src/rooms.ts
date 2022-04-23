@@ -1,75 +1,81 @@
-import { Room, Action } from "./types";
 import { generateId } from "./utils";
+import type { Video, IRoom, Action, Message, User } from "./types";
 
-class Rooms {
-  private _rooms: { [id: string]: Room } = {};
+export class Room implements IRoom {
+  id: string;
+  users: User[];
+  messages: Message[];
+  ownerId: string;
+  video: Video;
+  actionMap: { [key: string]: (payload: any) => void };
 
-  public getRooms = (): Room[] => {
-    return Object.values(this._rooms);
+  constructor(ownerId: string) {
+    this.id = generateId();
+    this.users = [];
+    this.messages = [];
+    this.ownerId = ownerId;
+    this.video = { url: "", time: 0, paused: false };
+
+    this.actionMap = {
+      "add-user": this.addUser,
+      "remove-user": this.removeUser,
+      "add-message": this.addMessage,
+      "set-video": this.setVideo,
+    };
+  }
+
+  public update(action: Action): void {
+    const handler = this.actionMap[action.type];
+    handler && handler(action.payload);
+  }
+
+  public setVideo = (video: Video) => {
+    this.video = video;
   };
 
-  public getRoomById(id: string): Room | undefined {
-    return this._rooms[id];
-  }
-
-  public deleteRoom(roomId: string) {
-    delete this._rooms[roomId];
-  }
-
-  public createRoom(ownerId: string): Room {
-    const roomId = generateId();
-    const room = {
-      id: roomId,
-      ownerId,
-      users: [],
-      messages: [],
-      video: {
-        url: "",
-        time: 0,
-        paused: false,
-      },
-      update: (action: Action) => this._updateRoom(roomId, action),
-    };
-
-    this._rooms[roomId] = room;
-
-    return room;
-  }
-
-  private _updateRoom(roomId: string, action: Action): boolean {
-    const room = this.getRoomById(roomId);
-
-    if (!room) {
-      return false;
+  public addUser = (user: User) => {
+    if (this.users.find((u) => u.id === user.id)) {
+      return;
     }
 
-    switch (action.type) {
-      case "ADD":
-        if (
-          action.property === "users" &&
-          this._rooms[roomId][action.property].find(
-            (item) => item.id === action.payload.id
-          )
-        ) {
-          return false;
-        }
+    this.users.push(user);
+  };
 
-        (this._rooms[roomId][action.property] as any[]).push(action.payload);
-        break;
-      case "REMOVE":
-        console.log(`Removed ${action.payload} from ${action.property}`);
+  public removeUser = (user: User) => {
+    this.users = this.users.filter((u) => u.id !== user.id);
+  };
 
-        (this._rooms[roomId][action.property] as any[]) = (
-          this._rooms[roomId][action.property] as any[]
-        ).filter((e) => e !== action.payload);
-        break;
-      case "SET":
-        this._rooms[roomId][action.property] = action.payload;
-        break;
-    }
-
-    return true;
-  }
+  public addMessage = (message: Message) => {
+    this.messages.push(message);
+  };
 }
 
-export default Rooms;
+export class Rooms {
+  private rooms: Room[] = [];
+
+  constructor() {
+    this.rooms = [];
+  }
+
+  public getRoomById = (id: string): Room | undefined => {
+    return this.rooms.find((room) => room.id === id);
+  };
+
+  public createRoom = (ownerId: string): Room => {
+    const room = new Room(ownerId);
+    this.rooms.push(room);
+    return room;
+  };
+
+  public getRooms = (): Room[] => {
+    return this.rooms;
+  };
+
+  public getRoomsByUser = (userId: string): Room[] => {
+    return this.rooms.filter((room) => room.users.some((u) => u.id === userId));
+  };
+
+  public getRoomsByOwner = (ownerId: string): Room[] => {
+    return this.rooms.filter((room) => room.ownerId === ownerId);
+  };
+}

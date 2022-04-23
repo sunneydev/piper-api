@@ -1,35 +1,19 @@
+import type { Action, User } from "./types";
+
+import { Room, Rooms } from "./rooms";
+import { Server } from "socket.io";
+import express from "express";
 import cors from "cors";
 import http from "http";
-import Rooms from "./rooms";
-import express from "express";
-import { Server } from "socket.io";
-import { Action, Room, User } from "./types";
 
 const app = express();
 const rooms = new Rooms();
 const port: number = Number(process.env.PORT) || 5000;
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
-const router = express.Router();
 
 app.use(express.json());
 app.use(cors());
-
-router.use((req, res, next) =>
-  req.headers.authorization === "sanibani@"
-    ? next()
-    : res.status(401).send("Unauthorized")
-);
-
-router.get("/rooms", (req, res) => res.json(rooms.getRooms()));
-
-router.delete("/rooms/:roomId", (req, res) => {
-  const roomId = req.params.roomId;
-  rooms.deleteRoom(roomId);
-  res.sendStatus(200);
-});
-
-app.use("/admin", router);
 
 io.on("connection", (socket) => {
   const dispatch = (room: Room, action: Action) => {
@@ -56,8 +40,11 @@ io.on("connection", (socket) => {
       return socket.disconnect();
     }
 
-    dispatch(room, { type: "ADD", property: "users", payload: user });
-    socket.emit("room", room);
+    dispatch(room, { type: "add-user", payload: user });
+    socket.emit("action", {
+      type: "room",
+      payload: room,
+    } as Action);
     socket.join(room.id);
   });
 
@@ -69,9 +56,8 @@ io.on("connection", (socket) => {
       room &&
       user &&
       dispatch(room, {
-        type: "REMOVE",
+        type: "remove-user",
         payload: user,
-        property: "users",
       })
   );
 });
