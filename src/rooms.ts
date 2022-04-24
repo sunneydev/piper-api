@@ -3,14 +3,16 @@ import type { Video, IRoom, Action, Message, User } from "./types";
 
 export class Room implements IRoom {
   id: string;
+  name: string;
   users: User[];
   messages: Message[];
   ownerId: string;
   video: Video;
   actionMap: { [key: string]: (payload: any) => void };
 
-  constructor(ownerId: string) {
+  constructor(ownerId: string, name: string) {
     this.id = generateId();
+    this.name = name;
     this.users = [];
     this.messages = [];
     this.ownerId = ownerId;
@@ -31,6 +33,10 @@ export class Room implements IRoom {
 
   public setVideo = (video: Video) => {
     this.video = video;
+  };
+
+  public isUserInRoom = (userId: string): boolean => {
+    return this.users.some((user) => user.id === userId);
   };
 
   public addUser = (user: User) => {
@@ -61,8 +67,8 @@ export class Rooms {
     return this.rooms.find((room) => room.id === id);
   };
 
-  public createRoom = (ownerId: string): Room => {
-    const room = new Room(ownerId);
+  public createRoom = (ownerId: string, name: string): Room => {
+    const room = new Room(ownerId, name);
     this.rooms.push(room);
     return room;
   };

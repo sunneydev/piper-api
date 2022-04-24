@@ -1,7 +1,7 @@
 import type { Action, User } from "./types";
 
 import { Room, Rooms } from "./rooms";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -15,18 +15,27 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(express.json());
 app.use(cors());
 
-io.on("connection", (socket) => {
-  const dispatch = (room: Room, action: Action) => {
-    room.update(action);
-    socket.broadcast.to(room.id).emit("action", action);
-  };
+const dispatch = (socket: Socket, room: Room | undefined, action: Action) => {
+  if (!room) {
+    console.error("Room not found");
+    return;
+  }
 
+  if (!room.isUserInRoom(room.ownerId)) {
+    console.error("User not found");
+    return;
+  }
+
+  room.update(action);
+  socket.broadcast.to(room.id).emit("action", action);
+};
+
+io.on("connection", (socket) => {
   let room: Room | undefined;
   let user: User | undefined;
 
   socket.on("join", (payload: { roomId: string; user: User }) => {
-    const _room = rooms.getRoomById(payload.roomId);
-    room = _room;
+    room = rooms.getRoomById(payload.roomId);
 
     if (!room) {
       socket.emit("error", { message: "Room not found" });
@@ -34,13 +43,18 @@ io.on("connection", (socket) => {
     }
 
     if (payload.user) {
+      if (room.isUserInRoom(payload.user.id)) {
+        socket.emit("error", { message: "User already in room" });
+        return socket.disconnect();
+      }
+
       user = payload.user;
     } else {
       socket.emit("error", { message: "No user provided" });
       return socket.disconnect();
     }
 
-    dispatch(room, { type: "add-user", payload: user });
+    dispatch(socket, room, { type: "add-user", payload: user });
     socket.emit("action", {
       type: "room",
       payload: room,
@@ -48,18 +62,23 @@ io.on("connection", (socket) => {
     socket.join(room.id);
   });
 
-  socket.on("action", dispatch);
+  socket.on("action", (action: Action) => dispatch(socket, room, action));
 
-  socket.on(
-    "disconnect",
-    () =>
-      room &&
-      user &&
-      dispatch(room, {
-        type: "remove-user",
-        payload: user,
-      })
-  );
+  socket.on("disconnect", () => {
+    if (!room || !user) return;
+
+    dispatch(socket, room, {
+      type: "remove-user",
+      payload: user,
+    });
+
+    if (room.ownerId === user?.id) {
+      dispatch(socket, room, {
+        type: "set-video",
+        payload: { ...room?.video, paused: true },
+      });
+    }
+  });
 });
 
 app.get("/room/:roomId", (req, res) => {
@@ -73,6 +92,16 @@ app.get("/room/:roomId", (req, res) => {
   res.json({ success: true, room });
 });
 
-app.post("/room", (req, res) => res.json(rooms.createRoom(req.body.ownerId)));
+app.post("/room", (req, res) => {
+  const { name, ownerId } = req.body;
 
-server.listen(port, () => console.log(`Listening on port ${port} ✅`));
+  if (!name || !ownerId) {
+    return res.status(400).json({ success: false, error: "Missing fields" });
+  }
+
+  res.json(rooms.createRoom(ownerId, name));
+});
+
+server.listen(port, "192.168.0.106", () =>
+  console.log(`Listening on port ${port} ✅`)
+);

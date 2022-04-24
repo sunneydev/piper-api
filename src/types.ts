@@ -1,9 +1,11 @@
 export interface IRoom {
   id: string;
+  name: string;
   users: User[];
   messages: Message[];
   ownerId: string;
   video: Video;
+  update: (action: Action) => void;
 }
 
 export interface Video {
@@ -19,6 +21,7 @@ export interface User {
 }
 
 export interface Message {
+  authorId: string;
   content: string;
   author: User;
 }
