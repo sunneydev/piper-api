@@ -4,7 +4,6 @@ import { Server, Socket } from "socket.io";
 import express from "express";
 import cors from "cors";
 import http from "http";
-import e from "cors";
 
 const app = express();
 const rooms = new Rooms();
