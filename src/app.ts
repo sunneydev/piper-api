@@ -102,6 +102,6 @@ app.post("/room", (req, res) => {
   res.json(rooms.createRoom(ownerId, name));
 });
 
-server.listen(port, "192.168.0.106", () =>
+server.listen(port, () =>
   console.log(`Listening on port ${port} ✅`)
 );
