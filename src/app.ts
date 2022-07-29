@@ -1,10 +1,10 @@
 import type { Action, User } from "./types";
-
 import { Room, Rooms } from "./rooms";
 import { Server, Socket } from "socket.io";
 import express from "express";
 import cors from "cors";
 import http from "http";
+import e from "cors";
 
 const app = express();
 const rooms = new Rooms();
@@ -21,12 +21,30 @@ const dispatch = (socket: Socket, room: Room | undefined, action: Action) => {
     return;
   }
 
-  if (!room.isUserInRoom(room.ownerId)) {
-    console.error("User not found");
-    return;
+  room.update(action);
+
+  if (action.type === "cmd") {
+    const commandMessages: {
+      [key: string]: string;
+    } = {
+      "pause": "video is paused sir",
+      "play": "video is playing sir",
+      "set": "video is set sir",
+    }
+    action = {
+      type: "add-message",
+      payload: {
+        author: {
+          avatar: "https://i1.sndcdn.com/artworks-sUZuSm54AvHM5DzC-sRJf4A-t500x500.jpg",
+          id: "6969",
+          name: "ChadBot",
+        },
+        authorId: "6969",
+        content: commandMessages[action.payload],
+      }
+    }
   }
 
-  room.update(action);
   socket.broadcast.to(room.id).emit("action", action);
 };
 

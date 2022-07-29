@@ -1,12 +1,13 @@
 {
-  "name": "project-name",
+  "name": "piper-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "npm run build && node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "caddy": "caddy reverse-proxy --from home.sunney.dev --to localhost:5000"
   },
   "keywords": [],
   "author": "",

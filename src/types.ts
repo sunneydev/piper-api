@@ -28,18 +28,22 @@ export interface Message {
 
 export type Action =
   | {
-      type: "add-user" | "remove-user";
-      payload: User;
-    }
+    type: "add-user" | "remove-user";
+    payload: User;
+  }
   | {
-      type: "add-message";
-      payload: Message;
-    }
+    type: "add-message";
+    payload: Message;
+  }
   | {
-      type: "set-video";
-      payload: Video;
-    }
+    type: "set-video";
+    payload: Video;
+  }
   | {
-      type: "room";
-      payload: IRoom;
-    };
+    type: "room";
+    payload: IRoom;
+  }
+  | {
+    type: "cmd";
+    payload: string;
+  }
