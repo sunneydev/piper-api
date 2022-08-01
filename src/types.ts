@@ -1,6 +1,5 @@
 export interface IRoom {
   id: string;
-  name: string;
   users: User[];
   messages: Message[];
   ownerId: string;

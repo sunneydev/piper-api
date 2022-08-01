@@ -110,13 +110,13 @@ app.get("/room/:roomId", (req, res) => {
 });
 
 app.post("/room", (req, res) => {
-  const { name, ownerId } = req.body;
+  const { ownerId } = req.body;
 
-  if (!name || !ownerId) {
+  if (!ownerId) {
     return res.status(400).json({ success: false, error: "Missing fields" });
   }
 
-  res.json(rooms.createRoom(ownerId, name));
+  res.json(rooms.createRoom(ownerId));
 });
 
 server.listen(port, () =>
