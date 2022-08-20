@@ -21,7 +21,7 @@ export class Room implements IRoom {
       "remove-user": this.removeUser,
       "add-message": this.addMessage,
       "set-video": this.setVideo,
-      "cmd": this.handleCmd,
+      cmd: this.handleCmd,
     };
   }
 
@@ -58,21 +58,22 @@ export class Room implements IRoom {
     const commandMessages: {
       [key: string]: string;
     } = {
-      "pause": "video is paused sir",
-      "play": "video is playing sir",
-      "set": "video is set sir",
-    }
+      pause: "video is paused sir",
+      play: "video is playing sir",
+      set: "video is set sir",
+    };
 
     this.addMessage({
       author: {
-        avatar: "https://i1.sndcdn.com/artworks-sUZuSm54AvHM5DzC-sRJf4A-t500x500.jpg",
+        avatar:
+          "https://i1.sndcdn.com/artworks-sUZuSm54AvHM5DzC-sRJf4A-t500x500.jpg",
         id: "6969",
         name: "ChadBot",
       },
       authorId: "6969",
-      content: commandMessages[payload],
+      content: commandMessages[payload]!,
     });
-  }
+  };
 }
 
 export class Rooms {
