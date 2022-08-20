@@ -41,7 +41,7 @@ const dispatch = (socket: Socket, room: Room | undefined, action: Action) => {
           name: "ChadBot",
         },
         authorId: "6969",
-        content: commandMessages[action.payload],
+        content: commandMessages[action.payload]!,
       },
     };
   }

@@ -26,7 +26,6 @@
     // "strictPropertyInitialization": true, // Included in "Strict"
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
-    "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "useUnknownInCatchVariables": true,
