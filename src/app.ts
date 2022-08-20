@@ -7,7 +7,7 @@ import http from "http";
 
 const app = express();
 const rooms = new Rooms();
-const port: number = Number(process.env.PORT) || 5000;
+const port = Number(process.env.PORT) || 5000;
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
@@ -26,22 +26,24 @@ const dispatch = (socket: Socket, room: Room | undefined, action: Action) => {
     const commandMessages: {
       [key: string]: string;
     } = {
-      "pause": "video is paused sir",
-      "play": "video is playing sir",
-      "set": "video is set sir",
-    }
+      pause: "video is paused",
+      play: "video is playing",
+      set: "video is set",
+      seek: "ok",
+    };
     action = {
       type: "add-message",
       payload: {
         author: {
-          avatar: "https://i1.sndcdn.com/artworks-sUZuSm54AvHM5DzC-sRJf4A-t500x500.jpg",
+          avatar:
+            "https://i1.sndcdn.com/artworks-sUZuSm54AvHM5DzC-sRJf4A-t500x500.jpg",
           id: "6969",
           name: "ChadBot",
         },
         authorId: "6969",
         content: commandMessages[action.payload],
-      }
-    }
+      },
+    };
   }
 
   socket.broadcast.to(room.id).emit("action", action);
@@ -119,6 +121,4 @@ app.post("/room", (req, res) => {
   res.json(rooms.createRoom(ownerId));
 });
 
-server.listen(port, () =>
-  console.log(`Listening on port ${port} ✅`)
-);
+server.listen(port, () => console.log(`Listening on port ${port} ✅`));
