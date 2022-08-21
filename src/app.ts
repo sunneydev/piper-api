@@ -155,4 +155,8 @@ app.get("/search", async (req, res) => {
   res.json(processed);
 });
 
+app.get('/health', (req, res) => {
+  res.sendStatus(200);
+})
+
 server.listen(port, () => console.log(`Listening on port ${port} ✅`));
