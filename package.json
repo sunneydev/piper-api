@@ -10,7 +10,7 @@
     "caddy": "caddy reverse-proxy --from home.sunney.dev --to localhost:5000"
   },
   "keywords": [],
-  "author": "",
+  "author": "sunneydev",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",
