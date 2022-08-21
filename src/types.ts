@@ -27,22 +27,46 @@ export interface Message {
 
 export type Action =
   | {
-    type: "add-user" | "remove-user";
-    payload: User;
-  }
+      type: "add-user" | "remove-user";
+      payload: User;
+    }
   | {
-    type: "add-message";
-    payload: Message;
-  }
+      type: "add-message";
+      payload: Message;
+    }
   | {
-    type: "set-video";
-    payload: Video;
-  }
+      type: "set-video";
+      payload: Video;
+    }
   | {
-    type: "room";
-    payload: IRoom;
-  }
+      type: "room";
+      payload: IRoom;
+    }
   | {
-    type: "cmd";
-    payload: string;
-  }
+      type: "cmd";
+      payload: string;
+    };
+
+export interface Season {
+  season: number;
+  episodes: Episode[];
+}
+
+export interface Episode {
+  name: string;
+  episode: number;
+  files: File[];
+}
+
+export interface File {
+  lang: Lang;
+  subtitles: Subtitle[];
+  src: string;
+}
+
+export interface Subtitle {
+  lang: Lang;
+  url: string;
+}
+
+export type Lang = "ENG" | "GEO" | "RU";

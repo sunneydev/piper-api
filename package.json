@@ -6,7 +6,7 @@
     "start": "node dist/app.mjs",
     "prestart": "npm run build",
     "build": "tsup src/app.ts --format esm --clean --sourcemap --minify --metafile",
-    "dev": "tsup src/app.ts --format esm --watch --clean --onSuccess \"node dist/app.mjs\"",
+    "dev": "tsup src/app.ts --sourcemap --format esm --watch --clean --onSuccess \"node dist/app.mjs\"",
     "caddy": "caddy reverse-proxy --from home.sunney.dev --to localhost:5000"
   },
   "keywords": [

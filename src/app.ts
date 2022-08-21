@@ -1,7 +1,7 @@
 import type { Action, User } from "./types";
 import { Room, Rooms } from "./rooms";
 import { Server, Socket } from "socket.io";
-import { search } from "./imovies";
+import { getMovie, getSeason, search } from "./imovies";
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -155,8 +155,37 @@ app.get("/search", async (req, res) => {
   res.json(processed);
 });
 
-app.get('/health', (req, res) => {
+app.get("/movie/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ success: false, error: "Missing fields" });
+  }
+
+  const movie = await getMovie(id);
+
+  const seasons = await Promise.all(
+    movie.seasons.data.map((s) =>
+      getSeason(s.movieId, s.number).then((season) => ({
+        season: season.season,
+        episodes: season.episodes.map((e) => ({
+          name: e.title,
+          episode: e.episode,
+          files: e.files.map((f) => ({
+            lang: f.lang,
+            subtitles: f.subtitles,
+            src: f.files[f.files.length - 1]?.src,
+          })),
+        })),
+      }))
+    )
+  );
+
+  res.json(seasons);
+});
+
+app.get("/health", (_, res) => {
   res.sendStatus(200);
-})
+});
 
 server.listen(port, () => console.log(`Listening on port ${port} ✅`));
