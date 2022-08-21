@@ -9,7 +9,9 @@
     "dev": "tsup src/app.ts --format esm --watch --clean --onSuccess \"node dist/app.mjs\"",
     "caddy": "caddy reverse-proxy --from home.sunney.dev --to localhost:5000"
   },
-  "keywords": [],
+  "keywords": [
+    "piper"
+  ],
   "author": "sunneydev",
   "license": "ISC",
   "dependencies": {
