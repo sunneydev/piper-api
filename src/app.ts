@@ -8,7 +8,7 @@ import http from "http";
 
 const app = express();
 const rooms = new Rooms();
-const port = Number(process.env.PORT) || 5000;
+const port = Number(process.env.PORT) || 9992;
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
